@@ -1,8 +1,8 @@
 // =============================================================================
-//  Brookstone Rover — ESP32 arcade-drive firmware
+//  Brookstone Rover — ESP32-S3 arcade-drive firmware
 // -----------------------------------------------------------------------------
 //  Hardware:
-//    - ESP32 DevKit V1 (38-pin, ESP-WROOM-32)
+//    - ESP32-S3-DevKitC-1 N16R8 (16 MB flash, 8 MB PSRAM)
 //    - DRV8833 dual H-bridge motor driver
 //    - Two DC motors (left track, right track)
 //
@@ -13,12 +13,11 @@
 //        * Right stick X-axis  -> steering (turn left / right)
 //      Mixed to tracks: left = throttle + steer, right = throttle - steer.
 //
-//  Pin wiring (ESP32 GPIO -> DRV8833):
-//    - GPIO 14 -> IN1 (left  motor, channel A)  [emits a brief PWM pulse at
-//                  boot, so the left track may twitch once on power-up]
-//    - GPIO 27 -> IN2 (left  motor, channel B)
-//    - GPIO 26 -> IN3 (right motor, channel A)
-//    - GPIO 25 -> IN4 (right motor, channel B)
+//  Pin wiring (ESP32-S3 GPIO -> DRV8833):
+//    - GPIO 4 -> IN1 (left  motor, channel A)
+//    - GPIO 5 -> IN2 (left  motor, channel B)
+//    - GPIO 6 -> IN3 (right motor, channel A)
+//    - GPIO 7 -> IN4 (right motor, channel B)
 //
 //  DRV8833 in-in (PWM) control logic per motor (slow decay / drive-brake):
 //    INa=HIGH, INb=PWM   -> forward (lower INb duty = faster)
@@ -33,10 +32,10 @@
 // -----------------------------------------------------------------------------
 // Pin assignments
 // -----------------------------------------------------------------------------
-static const int PIN_LEFT_IN1  = 14;  // left  motor, channel A
-static const int PIN_LEFT_IN2  = 27;  // left  motor, channel B
-static const int PIN_RIGHT_IN3 = 26;  // right motor, channel A
-static const int PIN_RIGHT_IN4 = 25;  // right motor, channel B
+static const int PIN_LEFT_IN1  = 4;  // left  motor, channel A
+static const int PIN_LEFT_IN2  = 5;  // left  motor, channel B
+static const int PIN_RIGHT_IN3 = 6;  // right motor, channel A
+static const int PIN_RIGHT_IN4 = 7;  // right motor, channel B
 
 // -----------------------------------------------------------------------------
 // LEDC (hardware PWM) configuration
