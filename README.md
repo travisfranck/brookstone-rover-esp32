@@ -2,7 +2,7 @@
 
 Firmware that converts a Brookstone Rover spy tank (tracked chassis, two DC
 motors) into a Bluetooth-gamepad-controlled robot. The original WiFi board is
-removed and replaced with an **ESP32-S3-DevKitC-1 N16R8** driving a **DRV8833** dual
+removed and replaced with an **ESP32 DevKit V1** driving a **DRV8833** dual
 H-bridge, with a **BLE gamepad** (PS4 / PS5 / Xbox / generic) as the controller
 via [Bluepad32](https://github.com/ricardoquesada/bluepad32). Tested with an
 Xbox One Wireless Controller.
@@ -23,7 +23,7 @@ Xbox One Wireless Controller.
 
 | Component | Part | Notes |
 |---|---|---|
-| MCU | ESP32-S3-DevKitC-1 N16R8 | 16 MB flash, 8 MB OPI PSRAM; USB |
+| MCU | ESP32 DevKit V1 (38-pin, ESP-WROOM-32) | USB micro |
 | Motor driver | DRV8833 dual H-bridge breakout | Single-supply (VCC is the motor supply, no separate VM) |
 | Power regulation | MP1584EN adjustable buck converter | Set to 5 V output |
 | Battery | 6x NiMH AA (7.2 V nominal, ~7.6 V charged) | Rechargeable |
@@ -35,17 +35,14 @@ Xbox One Wireless Controller.
 
 ![Fritzing wiring diagram of the ESP32 and DRV8833](img/wiring-diagram.png)
 
-> The wiring image shows the original ESP32 DevKit V1. Use the GPIO mapping
-> below for the ESP32-S3; the four motor signal wires must be moved.
-
-### Motor control signals (ESP32-S3 GPIO to DRV8833)
+### Motor control signals (ESP32 GPIO to DRV8833)
 
 | ESP32 GPIO | DRV8833 | Motor |
 |---|---|---|
-| GPIO 4 | IN1 | Left, channel A |
-| GPIO 5 | IN2 | Left, channel B |
-| GPIO 6 | IN3 | Right, channel A |
-| GPIO 7 | IN4 | Right, channel B |
+| GPIO 14 | IN1 | Left, channel A |
+| GPIO 27 | IN2 | Left, channel B |
+| GPIO 26 | IN3 | Right, channel A |
+| GPIO 25 | IN4 | Right, channel B |
 
 - `OUT1`/`OUT2` go to the left motor terminals, `OUT3`/`OUT4` to the right.
 - If a track runs backwards, swap its two `OUT` wires (or flip the sign in
@@ -100,8 +97,7 @@ pio device monitor            # serial monitor @ 115200 baud
 > `$env:PATH += ";$HOME\.platformio\penv\Scripts";`
 > Or just use the PlatformIO toolbar and tasks in VS Code.
 
-The board environment is `esp32-s3-devkitc-1` (see [platformio.ini](platformio.ini)).
-The configuration selects 16 MB flash and enables the module's 8 MB OPI PSRAM.
+The board environment is `esp32doit-devkit-v1` (see [platformio.ini](platformio.ini)).
 
 ### Bluepad32 note
 
@@ -137,8 +133,10 @@ Key constants live near the top of [src/main.cpp](src/main.cpp):
 
 ## Known quirks
 
-- The motor signals use GPIOs 4–7 on the ESP32-S3-DevKitC-1 N16R8. Do not use
-  GPIOs reserved for the module's flash or PSRAM.
+- **The left track twitches once at power-up.** GPIO 14 emits a brief PWM pulse
+  during ESP32 boot, before the firmware takes over. It is harmless. To remove
+  it, move `IN1` to a boot-clean GPIO (such as GPIO 13) and update
+  `PIN_LEFT_IN1`, or add a 10 kΩ pull-down on GPIO 14.
 - **The motors brake when you release the stick.** This is expected with
   slow-decay drive. The disconnect failsafe still coasts.
 - The DRV8833 is a small driver (1.2 A continuous, 2 A peak per channel). For

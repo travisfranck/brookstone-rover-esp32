@@ -5,7 +5,7 @@ repository.
 
 ## What this project is
 
-Firmware for a Brookstone Rover tank chassis converted to **ESP32-S3 + DRV8833 +
+Firmware for a Brookstone Rover tank chassis converted to **ESP32 + DRV8833 +
 BLE gamepad** control. Single-sketch Arduino/PlatformIO project. The entire
 application lives in [src/main.cpp](src/main.cpp). Tested with an Xbox One
 Wireless Controller (Bluepad32 also supports PS4/PS5/generic).
@@ -20,19 +20,18 @@ Wireless Controller (Bluepad32 also supports PS4/PS5/generic).
 
 ## Build, flash, monitor
 
-PlatformIO project. Environment: `esp32-s3-devkitc-1` for the ESP32-S3-DevKitC-1
-N16R8 (16 MB flash, 8 MB OPI PSRAM).
+PlatformIO project. Environment: `esp32doit-devkit-v1`.
 
 ```sh
-pio run -e esp32-s3-devkitc-1 # build
-pio run -e esp32-s3-devkitc-1 --target upload  # flash over USB
+pio run                      # build
+pio run --target upload      # flash over USB (board on a COM port, e.g. COM11)
 pio device monitor           # serial @ 115200
 ```
 
 - **Windows / PowerShell:** the CLI is often not on `PATH`. Prefix every
   command with:
   `$env:PATH += ";$HOME\.platformio\penv\Scripts";`
-- Always confirm a change still compiles with `pio run -e esp32-s3-devkitc-1`
+- Always confirm a change still compiles with `pio run -e esp32doit-devkit-v1`
   before declaring it done.
 - Close the serial monitor before uploading. It holds the COM port and the
   upload will fail with a port-busy error.
@@ -87,9 +86,11 @@ right directly with no mixing.
   from the >6.5 V motor rail.
 - This DRV8833 breakout is **single-supply** (VCC = motor supply; no separate
   VM pin). Current-sense pins are tied to GND on-board (no current limiting).
-- Motor signals use GPIOs 4–7. Avoid GPIOs reserved for the N16R8 module's
-  flash/PSRAM and confirm with the user before changing pins that require
-  moving wires.
+- **GPIO 14 emits a PWM pulse at boot** -> the left track twitches once on
+  power-up. Harmless. To fix, remap `PIN_LEFT_IN1` to a boot-clean pin
+  (e.g. GPIO 13). This requires the user to physically move the wire, so
+  always confirm before changing the pin.
+- Avoid GPIO 12 (boot strapping) and GPIO 1/3 (USB serial).
 
 ## Conventions
 
@@ -103,7 +104,7 @@ right directly with no mixing.
 
 ## Gotchas checklist before saying "done"
 
-- [ ] Compiles with `pio run -e esp32-s3-devkitc-1`.
+- [ ] Compiles with `pio run -e esp32doit-devkit-v1`.
 - [ ] LEDC calls use the **2.x** API.
 - [ ] Header comment in `main.cpp` still matches behavior.
 - [ ] No new `lib_deps` / stock-core additions.
